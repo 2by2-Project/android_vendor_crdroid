@@ -124,7 +124,7 @@ endif
 ifeq ($(PRODUCT_IS_AUTOMOTIVE),)
 PRODUCT_PACKAGES += \
     LineageParts \
-    LineageSetupWizard
+#    LineageSetupWizard
 endif
 
 PRODUCT_PACKAGES += \
