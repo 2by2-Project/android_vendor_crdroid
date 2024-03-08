@@ -41,10 +41,10 @@ except ImportError:
 DEBUG = False
 
 custom_local_manifest = ".repo/local_manifests/roomservice.xml"
-custom_default_revision =  "14.0"
-custom_dependencies = "crdroid.dependencies"
-org_manifest = "crdroidandroid"  # leave empty if org is provided in manifest
-org_display = "crDroid Android"  # needed for displaying
+custom_default_revision =  "14"
+custom_dependencies = "lineage.dependencies"
+org_manifest = "2by2-devices"  # leave empty if org is provided in manifest
+org_display = "2by2-Project-Devices"  # needed for displaying
 
 github_auth = None
 
@@ -154,6 +154,15 @@ def add_to_manifest(repos, fallback_branch=None):
             project.set('revision', fallback_branch)
         else:
             print("Using default branch for %s" % repo_name)
+
+        # aosp- remotes are only used for kernel prebuilts, thus they
+        # don't let you customize clone-depth/revision.
+        if repo_remote.startswith("aosp-"):
+            project.attrib["name"] = repo_name
+            project.attrib["remote"] = repo_remote
+            project.attrib["clone-depth"] = "1"
+            del project.attrib["revision"]
+
         lm.append(project)
 
     indent(lm)
@@ -255,11 +264,11 @@ def main():
         sys.exit()
 
     print("Device {0} not found. Attempting to retrieve device repository from "
-          "{1} Github (http://github.com/{2}).".format(device, org_display, org_manifest))
+          "{1} Github (http://github.com/{2}).".format(device, org_display, org_display))
 
     githubreq = urllib.request.Request(
         "https://api.github.com/search/repositories?"
-        "q={0}+user:{1}+in:name+fork:true".format(device, org_manifest))
+        "q={0}+user:{1}+in:name+fork:true".format(device, org_display))
     add_auth(githubreq)
 
     repositories = []
@@ -286,7 +295,7 @@ def main():
         fallback_branch = detect_revision(repository)
         manufacturer = repo_name.replace("android_device_", "").replace("_" + device, "")
         repo_path = "device/%s/%s" % (manufacturer, device)
-        adding = [{'repository': "crdroidandroid/" + repo_name, 'target_path': repo_path}]
+        adding = [{'repository': org_display + "/" + repo_name, 'target_path': repo_path}]
 
         add_to_manifest(adding, fallback_branch)
 
